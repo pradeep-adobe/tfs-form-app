@@ -1,0 +1,9 @@
+application:
+  dist: dist
+  hooks:
+    build-static: ./hooks/build-static.cjs
+  web:
+    src: web
+    response-headers:
+      /*:
+        Access-Control-Allow-Origin: '*'

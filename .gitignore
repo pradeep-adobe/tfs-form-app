@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.env
+.aio
+.aws.tmp.creds.json
+.parcel-cache/

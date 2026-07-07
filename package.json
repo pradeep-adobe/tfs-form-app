@@ -4,12 +4,16 @@
   "version": "0.1.0",
   "type": "module",
   "description": "TFS form React microfrontend consumed by the EDS form block and the Universal Editor extension.",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "vite build",
     "watch": "vite build --watch",
     "serve": "node server.mjs",
     "dev": "concurrently -k -n build,serve -c blue,green \"npm:watch\" \"npm:serve\"",
-    "dev:standalone": "vite --port 3002"
+    "dev:standalone": "vite --port 3002",
+    "deploy": "aio app deploy --no-log-forwarding-update"
   },
   "dependencies": {
     "react": "^18.3.1",
