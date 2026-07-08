@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react'
-import { resolveFormFields } from './fragments.js'
+import React, { useState } from 'react'
 
 function slugify(value, fallback) {
   const slug = String(value || '')
@@ -28,10 +27,10 @@ function FieldRow({ field, index }) {
   const name = controlName(field, index)
   const options = normalizeOptions(field.options)
 
-  if (type === 'fragment-pending') {
+  if (type === 'fragment') {
     return (
-      <div className="tfs-form-field tfs-form-fragment-pending">
-        Loading fragment: {field.path}…
+      <div className="tfs-form-field tfs-form-fragment-placeholder">
+        Fragment: {field.path || 'no path set'} (resolved when rendered on the page)
       </div>
     )
   }
@@ -98,37 +97,11 @@ function FieldRow({ field, index }) {
   )
 }
 
-function withFragmentPlaceholders(rawFields) {
-  return rawFields.map((f) => (
-    f.type === 'fragment' ? { type: 'fragment-pending', path: f.path } : f
-  ))
-}
-
 export default function TFSForm({ spec }) {
-  const { title = '', submitLabel = 'Submit', fields: rawFields = [] } = spec || {}
+  const { title = '', submitLabel = 'Submit', fields = [] } = spec || {}
   const [status, setStatus] = useState('')
-  const [fields, setFields] = useState(() => withFragmentPlaceholders(rawFields))
-
-  const fieldsKey = JSON.stringify(rawFields)
-
-  useEffect(() => {
-    let cancelled = false
-    setFields(withFragmentPlaceholders(rawFields))
-
-    if (rawFields.some((f) => f.type === 'fragment')) {
-      resolveFormFields(rawFields).then((resolved) => {
-        if (!cancelled) setFields(resolved)
-      })
-    }
-
-    return () => {
-      cancelled = true
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fieldsKey])
 
   const hasSubmit = fields.some((f) => f.type === 'submit')
-  const hasFragments = rawFields.some((f) => f.type === 'fragment')
 
   const handleSubmit = (event) => {
     event.preventDefault()
@@ -152,12 +125,6 @@ export default function TFSForm({ spec }) {
         <button type="submit" className="tfs-form-submit">{submitLabel || 'Submit'}</button>
       ) : null}
       {status ? <p className="tfs-form-status">{status}</p> : null}
-      {hasFragments ? (
-        <details className="tfs-form-debug" open>
-          <summary>Resolved form JSON (fragments expanded)</summary>
-          <pre>{JSON.stringify({ title, submitLabel, fields }, null, 2)}</pre>
-        </details>
-      ) : null}
     </form>
   )
 }

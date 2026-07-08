@@ -86,7 +86,7 @@ const CSS = `
   background: #f1f5f9;
   color: #475569;
 }
-.tfs-form-fragment-pending {
+.tfs-form-fragment-placeholder {
   padding: 10px 12px;
   border-radius: 6px;
   background: #f1f5f9;
@@ -99,28 +99,6 @@ const CSS = `
   background: #fef2f2;
   color: #b91c1c;
   font-size: 0.9rem;
-}
-.tfs-form-debug {
-  border: 1px dashed #cbd5e1;
-  border-radius: 6px;
-  padding: 8px 12px;
-}
-.tfs-form-debug summary {
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #475569;
-}
-.tfs-form-debug pre {
-  margin: 8px 0 0;
-  padding: 10px 12px;
-  border-radius: 6px;
-  background: #0f172a;
-  color: #e2e8f0;
-  font-size: 0.75rem;
-  overflow-x: auto;
-  white-space: pre-wrap;
-  word-break: break-word;
 }
 `
 
