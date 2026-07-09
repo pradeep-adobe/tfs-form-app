@@ -42,6 +42,22 @@ const CSS = `
 .tfs-form textarea {
   resize: vertical;
 }
+/* Only style a field as an error once the browser has actually flagged it
+   invalid (after a submit attempt or blur), never on pristine required fields. */
+.tfs-form-field:has(:user-invalid) .tfs-form-field-label {
+  color: #e63946;
+}
+.tfs-form input:user-invalid,
+.tfs-form select:user-invalid,
+.tfs-form textarea:user-invalid {
+  border-color: #e63946;
+}
+.tfs-form input:user-invalid:focus,
+.tfs-form select:user-invalid:focus,
+.tfs-form textarea:user-invalid:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.2);
+}
 .tfs-form-checkbox,
 .tfs-form-radio {
   display: inline-flex;
