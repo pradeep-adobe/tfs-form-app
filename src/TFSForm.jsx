@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
+import { isFieldVisible } from './fieldRules.js'
 
 function slugify(value, fallback) {
   const slug = String(value || '')
@@ -20,7 +21,7 @@ function normalizeOptions(options) {
     .filter(Boolean)
 }
 
-function FieldRow({ field, index }) {
+function FieldRow({ field, index, value, onValueChange }) {
   const {
     type = 'text', label = '', required = false, placeholder = '',
   } = field
@@ -39,7 +40,13 @@ function FieldRow({ field, index }) {
     return (
       <div className="tfs-form-field">
         <label className="tfs-form-checkbox">
-          <input type="checkbox" name={name} required={required} />
+          <input
+            type="checkbox"
+            name={name}
+            checked={value === 'on' || value === true}
+            required={required}
+            onChange={(event) => onValueChange(name, event.target.checked ? 'on' : '')}
+          />
           <span>{label}{required ? ' *' : ''}</span>
         </label>
       </div>
@@ -48,10 +55,24 @@ function FieldRow({ field, index }) {
 
   let control
   if (type === 'textarea') {
-    control = <textarea name={name} rows={4} placeholder={placeholder} required={required} />
+    control = (
+      <textarea
+        name={name}
+        rows={4}
+        placeholder={placeholder}
+        required={required}
+        value={value ?? ''}
+        onChange={(event) => onValueChange(name, event.target.value)}
+      />
+    )
   } else if (type === 'select') {
     control = (
-      <select name={name} required={required} defaultValue="">
+      <select
+        name={name}
+        required={required}
+        value={value ?? ''}
+        onChange={(event) => onValueChange(name, event.target.value)}
+      >
         <option value="">{placeholder || 'Select…'}</option>
         {options.map((opt, i) => (
           <option key={i} value={opt}>{opt}</option>
@@ -63,14 +84,30 @@ function FieldRow({ field, index }) {
       <div className="tfs-form-radio-group">
         {options.map((opt, i) => (
           <label key={i} className="tfs-form-radio">
-            <input type="radio" name={name} value={opt} required={required && i === 0} />
+            <input
+              type="radio"
+              name={name}
+              value={opt}
+              checked={value === opt}
+              required={required && i === 0}
+              onChange={(event) => onValueChange(name, event.target.value)}
+            />
             <span>{opt}</span>
           </label>
         ))}
       </div>
     )
   } else {
-    control = <input type={type} name={name} placeholder={placeholder} required={required} />
+    control = (
+      <input
+        type={type}
+        name={name}
+        placeholder={placeholder}
+        required={required}
+        value={value ?? ''}
+        onChange={(event) => onValueChange(name, event.target.value)}
+      />
+    )
   }
 
   return (
@@ -84,8 +121,13 @@ function FieldRow({ field, index }) {
 export default function TFSForm({ spec }) {
   const { title = '', submitLabel = 'Submit', fields = [] } = spec || {}
   const [status, setStatus] = useState('')
+  const [values, setValues] = useState({})
 
   const hasSubmit = fields.some((f) => f.type === 'submit')
+
+  const handleValueChange = useCallback((name, nextValue) => {
+    setValues((current) => ({ ...current, [name]: nextValue }))
+  }, [])
 
   const handleSubmit = (event) => {
     event.preventDefault()
@@ -102,9 +144,19 @@ export default function TFSForm({ spec }) {
   return (
     <form className="tfs-form" onSubmit={handleSubmit}>
       {title ? <h2 className="tfs-form-title">{title}</h2> : null}
-      {fields.map((field, index) => (
-        <FieldRow key={field.name || index} field={field} index={index} />
-      ))}
+      {fields.map((field, index) => {
+        if (!isFieldVisible(field, values)) return null
+        const name = controlName(field, index)
+        return (
+          <FieldRow
+            key={name || index}
+            field={field}
+            index={index}
+            value={values[name] ?? ''}
+            onValueChange={handleValueChange}
+          />
+        )
+      })}
       {!hasSubmit ? (
         <button type="submit" className="tfs-form-submit">{submitLabel || 'Submit'}</button>
       ) : null}
